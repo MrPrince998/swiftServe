@@ -7,10 +7,10 @@ export const databaseProviders = [
       const dataSource = new DataSource({
         type: 'postgres',
         host: 'localhost',
-        port: 5422,
-        username: 'admin',
+        port: 5050,
+        username: 'postgres',
         password: 'admin',
-        database: 'swiftserve',
+        database: 'swiftServe',
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         synchronize: true,
       });
