@@ -3,14 +3,14 @@ export interface BillingSubscription {
   subscriptionPlanDetailsID: string;
   subscriptionStartDate: Date;
   subscriptionEndDate: Date;
-  purachseHistory: PurchaseHistory[];
+  purchaseHistory: PurchaseHistory[];
   isActive: boolean;
   isOnTrial: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-enum SubscriptionPlan {
+export enum SubscriptionPlan {
   PRO = 'pro',
   PROFESSIONAL = 'professional',
   ENTERPRISE = 'enterprise',
