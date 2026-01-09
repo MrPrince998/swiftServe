@@ -25,11 +25,10 @@ export class User {
   @Column({ nullable: true })
   subscriptionId?: string;
 
-  @Column({ nullable: true })
-  @OneToOne(() => BillingSubscription)
+  @OneToOne(() => BillingSubscription, (subscription) => subscription.user)
   subscription?: BillingSubscription;
 
-  @Column({ nullable: true }) notificationIds?: string[];
+  @Column({ type: 'simple-array', nullable: true }) notificationIds?: string[];
   @Column({ default: false }) isEmailVerified: boolean;
   @Column({ nullable: true }) otp?: string;
   @Column({ nullable: true }) otpExpiry?: Date;
