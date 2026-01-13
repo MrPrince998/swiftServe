@@ -4,7 +4,7 @@ import {
   Column,
   Entity,
   OneToOne,
-  OneToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-branch.entity';
@@ -26,8 +26,8 @@ export class User {
   @Column({ nullable: true }) addressId: string;
   @Column({ default: false }) isEmployed: boolean;
   @Column({ nullable: true }) employeeID?: string;
-  @OneToMany(() => RestaurantBranch)
-  restaurantBranch?: string;
+  @ManyToOne(() => RestaurantBranch, (branch) => branch.staff)
+  restaurantBranch?: RestaurantBranch;
   @Column({ default: false }) isSubscribed: boolean;
 
   @Column({ nullable: true })
