@@ -1,6 +1,13 @@
 import { userRole } from '@interfaces/user.interface';
 import { BillingSubscription } from '@modules/billing-subscription/entities/billing-subscription.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-branch.entity';
 
 @Entity('users')
 export class User {
@@ -19,7 +26,8 @@ export class User {
   @Column({ nullable: true }) addressId: string;
   @Column({ default: false }) isEmployed: boolean;
   @Column({ nullable: true }) employeeID?: string;
-  @Column({ nullable: true }) restaurantId?: string;
+  @OneToMany(() => RestaurantBranch)
+  restaurantBranch?: string;
   @Column({ default: false }) isSubscribed: boolean;
 
   @Column({ nullable: true })
@@ -37,6 +45,7 @@ export class User {
   @Column({ nullable: true }) resetPasswordExpires?: Date;
   @Column({ default: true }) isPushNotificationsEnabled: boolean;
   @Column({ default: true }) isEmailNotificationsEnabled: boolean;
+  @Column({ default: false }) isUserDeleted: boolean;
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
   @Column({

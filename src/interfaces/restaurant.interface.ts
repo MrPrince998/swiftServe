@@ -1,23 +1,25 @@
-import { Branch } from "./branch.interface";
-
 export interface Restaurant {
-    id: string;
-    restaurantName: string;
-    branchIds: Branch[];
-    websiteUrl: string;
-    restaurantEmail: string;
-    restaurantPhone: string;
-    restaurantAddress: string;
-    restaurantLogo: string;
-    restaurantStatus: restaurantStatus;
-    restaurantUrl: string;
-    VATNumber: string;
-    registrationNumber: string;
-    createdAt: Date;
-    updatedAt: Date;
+  id: string;
+  restaurantName: string;
+  websiteUrl?: string;
+  restaurantEmail: string;
+  restaurantPhone?: string;
+  restaurantAddress: string;
+  restaurantLogoURL?: string;
+  restaurantStatus: restaurantStatus;
+  branchIds: string[];
+  planIds?: string;
+  subscriptionStatus?: string;
+  subscriptionId?: string;
+  maxUsers?: number;
+  VATNumber?: string;
+  registrationNumber?: string;
+  settings?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export enum restaurantStatus {
-    ACTIVE = 'active',
-    INACTIVE = 'inactive',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
 }
