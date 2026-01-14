@@ -26,6 +26,7 @@ export class User {
   @Column({ nullable: true }) addressId: string;
   @Column({ default: false }) isEmployed: boolean;
   @Column({ nullable: true }) employeeID?: string;
+
   @ManyToOne(() => RestaurantBranch, (branch) => branch.staff)
   restaurantBranch?: RestaurantBranch;
   @Column({ default: false }) isSubscribed: boolean;

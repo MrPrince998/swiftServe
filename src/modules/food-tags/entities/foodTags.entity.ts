@@ -1,6 +1,24 @@
-import { Entity } from 'typeorm';
+import { MenuItem } from '@modules/menu-item/entities/menuItem.enitity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class FoodTags {
-  field: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  name: string;
+
+  @ManyToOne(() => MenuItem, (item) => item.tags)
+  menuItem: MenuItem;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updatedAt: Date;
 }

@@ -1,7 +1,12 @@
 import { Controller } from '@nestjs/common';
 import { RestaurantBranchService } from './restaurant-branch.service';
 
-@Controller('restaurant-branch')
+@Controller('branch')
 export class RestaurantBranchController {
-  constructor(private readonly restaurantBranchService: RestaurantBranchService) {}
+  constructor(
+    private readonly restaurantBranchService: RestaurantBranchService,
+  ) {}
+
+  // @Post()
+  // create
 }

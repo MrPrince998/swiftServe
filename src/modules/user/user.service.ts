@@ -6,6 +6,9 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserResponseDto } from './dto/userResponse.dto';
 import { plainToInstance } from 'class-transformer';
+import { CreateAuthDto } from '@modules/auth/dto/create-auth.dto';
+import * as bcrypt from 'bcrypt';
+import { userRole } from '@interfaces/user.interface';
 
 @Injectable()
 export class UserService {
@@ -13,6 +16,38 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
   ) {}
+
+  async createStaff(
+    { email, password, role }: CreateUserDto,
+    owner: string,
+  ): Promise<UserResponseDto> {
+    if (!owner && email && password && role) {
+      throw new Error('owner Id, email, password, or role are required');
+    }
+
+    const existingOwner = await this.userRepo.findOne({ where: { id: owner } });
+    if (!existingOwner) {
+      throw new NotFoundException('Owner not found');
+    }
+
+    const existingEmail = await this.userRepo.findOne({ where: { email } });
+    if (existingEmail) {
+      throw new Error('Email already in use');
+    }
+    const hasedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = this.userRepo.create({
+      email,
+      password: hasedPassword,
+      role: role as userRole,
+    });
+
+    await this.userRepo.save(newUser);
+
+    return plainToInstance(UserResponseDto, newUser, {
+      excludeExtraneousValues: true,
+    });
+  }
 
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.userRepo.find();

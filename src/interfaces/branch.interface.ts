@@ -28,7 +28,7 @@ export interface Branch {
 export interface Table {
   id: string;
   tableNo: number;
-  tableStatus: boolean;
+  tableStatus: BranchStatus;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,4 +54,11 @@ export interface FoodTags {
   name: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export enum BranchStatus {
+  UNSEATED = 'UNSEATED',
+  SEATED = 'SEATED',
+  WAITING = 'WAITING',
+  ORDERED = 'ORDERED',
 }

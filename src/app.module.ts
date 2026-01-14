@@ -12,6 +12,7 @@ import { RestaurantBranchModule } from './modules/restaurant-branch/restaurant-b
 import { FoodTagsModule } from './modules/food-tags/food-tags.module';
 import { MenuItemModule } from './modules/menu-item/menu-item.module';
 import { TableModule } from './modules/table/table.module';
+import { TransactionLogsModule } from './modules/transaction-logs/transaction-logs.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { TableModule } from './modules/table/table.module';
     FoodTagsModule,
     MenuItemModule,
     TableModule,
+    TransactionLogsModule,
   ],
   controllers: [AppController, AuthController],
   providers: [AppService],
