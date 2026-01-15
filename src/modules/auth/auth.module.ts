@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { User } from '@modules/user/entities/user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from 'src/strategy/jwt.strategy';
+import { InternalAccessMiddleware } from './InternalAccessMiddleware';
 
 @Module({
   imports: [
@@ -20,4 +21,8 @@ import { JwtStrategy } from 'src/strategy/jwt.strategy';
   controllers: [AuthController],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(InternalAccessMiddleware).forRoutes('auth');
+  }
+}

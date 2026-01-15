@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
@@ -7,13 +11,24 @@ import { User } from '@modules/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { userRole } from '@interfaces/user.interface';
 import { AuthDto } from './dto/auth-dto';
+import { ConfigService } from '@nestjs/config';
+import {
+  RefreshTokenDto,
+  RefreshTokenResponseDto,
+} from './dto/refresh-token.dto';
 
+interface JwtPayload {
+  sub: string;
+  email: string;
+  role: userRole;
+}
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
-    private userRepo: Repository<User>,
-    private jwtService: JwtService,
+    private readonly userRepo: Repository<User>,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(createAuthDto: CreateAuthDto) {
@@ -40,9 +55,106 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException();
 
-    const payload = { sub: user.id, email: user.email };
+    const payload = { id: user.id, email: user.email, role: user.role };
+    const accessToken = await this.generateAccessToken(payload);
+    const refreshToken = await this.generateRefreshToken(payload);
 
-    const accessToken = await this.jwtService.sign(payload);
-    return { accessToken };
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async generateAccessToken(
+    user: Pick<User, 'id' | 'email' | 'role'>,
+  ): Promise<string> {
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const secret = this.configService.get<string>('JWT_SECRET');
+    const rawExpireIn = this.configService.get<string>('JWT_EXPIRES_IN', '1h');
+    const expiresInSeconds = parseInt(rawExpireIn, 10);
+
+    if (!secret) {
+      throw new BadRequestException(
+        'JWT_SECRET is not defined in configuration',
+      );
+    }
+
+    return this.jwtService.signAsync(payload, {
+      secret,
+      expiresIn: expiresInSeconds,
+    });
+  }
+
+  async generateRefreshToken(
+    user: Pick<User, 'id' | 'email' | 'role'>,
+  ): Promise<string> {
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+    const secret = this.configService.get<string>('JWT_SECRET');
+    const rawExpireIn = this.configService.get<string>('JWT_EXPIRES_IN', '7d');
+    const expiresInSeconds = parseInt(rawExpireIn, 10);
+    if (!secret) {
+      throw new BadRequestException(
+        'JWT_SECRET is not defined in configuration',
+      );
+    }
+    return this.jwtService.signAsync(payload, {
+      secret,
+      expiresIn: expiresInSeconds,
+    });
+  }
+
+  async refreshAccessToken(
+    dto: RefreshTokenDto,
+  ): Promise<RefreshTokenResponseDto> {
+    const { refreshToken } = dto;
+    const refreshSecret = this.configService.get<string>('JWT_SECRET');
+
+    if (!refreshSecret) {
+      throw new BadRequestException(
+        'JWT_SECRET is not defined in configuration',
+      );
+    }
+
+    let payload: JwtPayload;
+    try {
+      payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken, {
+        secret: refreshSecret,
+      });
+    } catch (e: any) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const user = await this.userRepo.findOne({ where: { id: payload.sub } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const accessToken = await this.generateAccessToken(user);
+    const newRefreshToken = await this.generateRefreshToken(user);
+
+    return {
+      accessToken,
+      refreshToken: newRefreshToken,
+      tokenType: 'Bearer',
+      expiresIn: parseInt(
+        this.configService.get<string>('JWT_EXPIRES_IN', '1h'),
+        10,
+      ),
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+      },
+    };
   }
 }
