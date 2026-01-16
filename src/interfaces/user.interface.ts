@@ -20,8 +20,8 @@ export interface User {
   subscriptionId?: BillingSubscription;
   notificationIds?: string[];
   twoFactorEnabled: boolean;
-  resetPasswordToken?: string;
-  resetPasswordExpires?: Date;
+  resetPasswordToken?: string | null;
+  resetPasswordExpires?: Date | null;
   isPushNotificationsEnabled: boolean;
   isEmailNotificationsEnabled: boolean;
   createdAt: Date;
@@ -29,10 +29,10 @@ export interface User {
 }
 
 export enum userRole {
-  SUPER_ADMIN = 'super_admin',
-  ADMIN = 'admin',
-  MANAGER = 'manager',
-  RECEPTIONIST = 'receptionist',
-  WAITER = 'waiter',
-  USER = 'user',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+  RECEPTIONIST = 'RECEPTIONIST',
+  WAITER = 'WAITER',
+  USER = 'USER',
 }

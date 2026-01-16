@@ -42,8 +42,8 @@ export class User {
   @Column({ nullable: true }) otp?: string;
   @Column({ nullable: true }) otpExpiry?: Date;
   @Column({ default: false }) twoFactorEnabled: boolean;
-  @Column({ nullable: true }) resetPasswordToken?: string;
-  @Column({ nullable: true }) resetPasswordExpires?: Date;
+  @Column({ type: 'varchar', length: 64, nullable: true }) resetPasswordToken?: string | null;
+  @Column({ type: 'timestamp', nullable: true }) resetPasswordExpires?: Date | null;
   @Column({ default: true }) isPushNotificationsEnabled: boolean;
   @Column({ default: true }) isEmailNotificationsEnabled: boolean;
   @Column({ default: false }) isUserDeleted: boolean;

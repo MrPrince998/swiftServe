@@ -16,11 +16,14 @@ import {
   RefreshTokenDto,
   RefreshTokenResponseDto,
 } from './dto/refresh-token.dto';
+import { GenerateToken } from 'src/utils/generateToken';
+import crypto from 'crypto';
 
 interface JwtPayload {
   sub: string;
   email: string;
   role: userRole;
+  type?: 'access' | 'refresh';
 }
 @Injectable()
 export class AuthService {
@@ -65,6 +68,46 @@ export class AuthService {
     };
   }
 
+  async forgotPassword(email: string) {
+    const user = await this.userRepo.findOne({ where: { email } });
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    const rawToken = GenerateToken();
+    const hasedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    user.resetPasswordToken = hasedToken;
+    user.resetPasswordExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    await this.userRepo.save(user);
+
+    // logic to send email
+
+  }
+
+  async resetPassword(email: string, password: string, token: string) {
+    const user = await this.userRepo.findOne({ where: { email } });
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    
+    if(user.resetPasswordToken !== token) {
+      throw new UnauthorizedException();
+    }
+
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      throw new UnauthorizedException();
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await this.userRepo.save(user);
+    return { message: 'Password reset successfully' };
+  }
+
+  
+
   async generateAccessToken(
     user: Pick<User, 'id' | 'email' | 'role'>,
   ): Promise<string> {
@@ -72,6 +115,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      type: 'access',
     };
 
     const secret = this.configService.get<string>('JWT_SECRET');
@@ -97,9 +141,13 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      type: 'refresh',
     };
-    const secret = this.configService.get<string>('JWT_SECRET');
-    const rawExpireIn = this.configService.get<string>('JWT_EXPIRES_IN', '7d');
+    const secret = this.configService.get<string>('JWT_REFRESH_SECRET');
+    const rawExpireIn = this.configService.get<string>(
+      'JWT_REFRESH_EXPIRES_IN',
+      '1d',
+    );
     const expiresInSeconds = parseInt(rawExpireIn, 10);
     if (!secret) {
       throw new BadRequestException(

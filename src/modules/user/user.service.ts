@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -141,11 +141,29 @@ export class UserService {
     });
   }
 
-  // async softDelete(id: string): Promise<User> {
-  //   return this.userRepo.softDelete(id);
-  // }
+  async softDelete(id: string): Promise<{message: string}> {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-  // async remove(id: string): Promise<User> {
-  //   return this.userRepo.remove(id);
-  // }
+    const savedUser = await this.userRepo.preload({ id, isUserDeleted: true });
+    if(!savedUser) {
+      throw new NotFoundException('User not found during preload');
+    }
+    await this.userRepo.save(savedUser);
+    return {message: `User ${id} deleted successfully`};
+  }
+
+  async verifyEmail(email: string) {
+      const user = await this.userRepo.findOne({ where: { email } });
+      if (!user) {
+        throw new UnauthorizedException();
+      }
+      user.isEmailVerified = true;
+      await this.userRepo.save(user);
+      return { message: 'Email verified successfully' };
+    }
+
+  
 }

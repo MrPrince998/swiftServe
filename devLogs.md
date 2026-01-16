@@ -2,4 +2,5 @@
 
 ## Development Logs
 
+- Implemented logout endpoint
 -
