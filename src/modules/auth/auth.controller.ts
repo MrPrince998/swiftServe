@@ -23,7 +23,6 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() dto: CreateAuthDto, @Res() res: Response) {
-    console.log("hello")
     const { accessToken, refreshToken } = await this.authService.register(dto);
 
     res.cookie('accessToken', accessToken, {
@@ -40,7 +39,6 @@ export class AuthController {
       path: '/',
       maxAge: 1 * 24 * 60 * 60 * 1000,
     }); // 1 day
-    console.log("test")
     return res.json({ message: 'Register successful' });
   }
 
@@ -88,7 +86,6 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @Get('me')
   getCurrentUser(@Req() req: any) {
-    console.log("user",req.user)
-    return this.userService.findOne(req.user.id)
+    return this.userService.findOne(req.user.userId)
   }
 }

@@ -11,13 +11,13 @@ export class TenentController {
   @HttpCode(200)
   @Post('create-restaurant')
   createRestaurant(@Body() tenent: RestaurantTenent, @Req() req: any) {
-    return this.tenentService.createRestaurant(tenent, req.user.id);
+    return this.tenentService.createRestaurant(tenent, req.user.userId);
   }
 
   @UseGuards(JwtGuard)
   @HttpCode(200)
   @Get('my-restaurant')
   getMyRestaurant(@Req() req: any) {
-    return this.tenentService.getMyRestaurant(req.user.id);
+    return this.tenentService.getMyRestaurant(req.user.userId);
   }
 }

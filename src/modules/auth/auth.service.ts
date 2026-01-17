@@ -24,7 +24,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserService } from '@modules/user/user.service';
 
 interface JwtPayload {
-  id: string;
+  sub: string;
   email: string;
   role: userRole;
   type?: 'access' | 'refresh';
@@ -139,7 +139,7 @@ export class AuthService {
     user: Pick<User, 'id' | 'email' | 'role'>,
   ): Promise<string> {
     const payload: JwtPayload = {
-      id: user.id,
+      sub: user.id,
       email: user.email,
       role: user.role,
       type: 'access',
@@ -165,7 +165,7 @@ export class AuthService {
     user: Pick<User, 'id' | 'email' | 'role'>,
   ): Promise<string> {
     const payload: JwtPayload = {
-      id: user.id,
+      sub: user.id,
       email: user.email,
       role: user.role,
       type: 'refresh',
@@ -208,7 +208,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const user = await this.userRepo.findOne({ where: { id: payload.id } });
+    const user = await this.userRepo.findOne({ where: { id: payload.sub } });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
