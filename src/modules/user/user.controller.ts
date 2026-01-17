@@ -8,9 +8,9 @@ import {
   Delete,
   UseGuards,
   ParseUUIDPipe,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtGuard } from 'src/strategy/auth/jwt.guard';
 import { RolesGuard } from 'src/strategy/role/role.guard';
@@ -47,4 +47,6 @@ export class UserController {
   softDelete(@Param('id', ParseUUIDPipe) id: string) {
     return this.userService.softDelete(id);
   }
+
+  
 }

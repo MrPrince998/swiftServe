@@ -6,10 +6,11 @@ import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-
 import { FoodTags } from '@modules/food-tags/entities/foodTags.entity';
 import { MenuItem } from '@modules/menu-item/entities/menuItem.enitity';
 import { Table } from '@modules/table/entities/table.entity';
+import { RestaurantTenent } from './entities/tenent.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([RestaurantBranch, FoodTags, MenuItem, Table]),
+    TypeOrmModule.forFeature([RestaurantBranch, FoodTags, MenuItem, Table, RestaurantTenent]),
   ],
   controllers: [TenentController],
   providers: [TenentService],

@@ -8,10 +8,11 @@ import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-
 import { JwtGuard } from 'src/strategy/auth/jwt.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/strategy/role/role.guard';
+import { TenentModule } from '@modules/tenent/tenent.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, BillingSubscription, RestaurantBranch]),
+    TypeOrmModule.forFeature([User, BillingSubscription, RestaurantBranch, TenentModule]),
   ],
   controllers: [UserController],
   providers: [
@@ -24,7 +25,7 @@ import { RolesGuard } from 'src/strategy/role/role.guard';
     //   provide: APP_GUARD,
     //   useClass: RolesGuard,
     // },
-  ],
+  ],  
   exports: [UserService],
 })
 export class UserModule {}

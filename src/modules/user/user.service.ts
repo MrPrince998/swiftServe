@@ -109,7 +109,7 @@ export class UserService {
     }
 
     const allowedFields: (keyof User)[] = [
-      'username',
+      'fullName',
       'role',
       'imageUrl',
       'employeeID',
@@ -155,15 +155,7 @@ export class UserService {
     return {message: `User ${id} deleted successfully`};
   }
 
-  async verifyEmail(email: string) {
-      const user = await this.userRepo.findOne({ where: { email } });
-      if (!user) {
-        throw new UnauthorizedException();
-      }
-      user.isEmailVerified = true;
-      await this.userRepo.save(user);
-      return { message: 'Email verified successfully' };
-    }
+ 
 
   
 }

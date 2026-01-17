@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -18,9 +19,12 @@ import {
 } from './dto/refresh-token.dto';
 import { GenerateToken } from 'src/utils/generateToken';
 import crypto from 'crypto';
+import { UserResponseDto } from '@modules/user/dto/userResponse.dto';
+import { plainToInstance } from 'class-transformer';
+import { UserService } from '@modules/user/user.service';
 
 interface JwtPayload {
-  sub: string;
+  id: string;
   email: string;
   role: userRole;
   type?: 'access' | 'refresh';
@@ -35,15 +39,30 @@ export class AuthService {
   ) {}
 
   async register(createAuthDto: CreateAuthDto) {
-    const { email, password, role } = createAuthDto;
+    const { email, password,fullName, phoneNumber } = createAuthDto;
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    const existingUser = await this.userRepo.findOne({ where: { email } });
+    if (existingUser) {
+      throw new BadRequestException('User already exists');
+    }
     const user = this.userRepo.create({
       email,
       password: hashedPassword,
-      role: role as userRole,
+      role: userRole.ADMIN,
+      fullName,
+      phoneNumber,
     });
     await this.userRepo.save(user);
-    return { message: 'User registered successfully' };
+
+    const payload = { id: user.id, email: user.email, role: user.role };
+    const accessToken = await this.generateAccessToken(payload);
+    const refreshToken = await this.generateRefreshToken(payload);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   async login(authDto: AuthDto) {
@@ -106,13 +125,21 @@ export class AuthService {
     return { message: 'Password reset successfully' };
   }
 
-  
+  async verifyEmail(email: string) {
+      const user = await this.userRepo.findOne({ where: { email } });
+      if (!user) {
+        throw new UnauthorizedException();
+      }
+      user.isEmailVerified = true;
+      await this.userRepo.save(user);
+      return { message: 'Email verified successfully' };
+    }
 
   async generateAccessToken(
     user: Pick<User, 'id' | 'email' | 'role'>,
   ): Promise<string> {
     const payload: JwtPayload = {
-      sub: user.id,
+      id: user.id,
       email: user.email,
       role: user.role,
       type: 'access',
@@ -138,7 +165,7 @@ export class AuthService {
     user: Pick<User, 'id' | 'email' | 'role'>,
   ): Promise<string> {
     const payload: JwtPayload = {
-      sub: user.id,
+      id: user.id,
       email: user.email,
       role: user.role,
       type: 'refresh',
@@ -181,7 +208,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const user = await this.userRepo.findOne({ where: { id: payload.sub } });
+    const user = await this.userRepo.findOne({ where: { id: payload.id } });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -200,7 +227,7 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        username: user.username,
+        fullName: user.fullName,
         role: user.role,
       },
     };

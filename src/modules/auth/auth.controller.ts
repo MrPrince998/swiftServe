@@ -6,20 +6,42 @@ import {
   HttpCode,
   UseGuards,
   Req,
+  Get,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { AuthDto } from './dto/auth-dto';
 import { JwtGuard } from 'src/strategy/auth/jwt.guard';
+import { UserService } from '@modules/user/user.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() dto: CreateAuthDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: CreateAuthDto, @Res() res: Response) {
+    console.log("hello")
+    const { accessToken, refreshToken } = await this.authService.register(dto);
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 15 * 60 * 1000,
+    }); // 15 minutes
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 1 * 24 * 60 * 60 * 1000,
+    }); // 1 day
+    console.log("test")
+    return res.json({ message: 'Register successful' });
   }
 
   @HttpCode(200)
@@ -60,5 +82,13 @@ export class AuthController {
     const { email } = dto;
     await this.authService.forgotPassword(email);
     return res.json({ message: 'Password reset token sent successfully' });
+  }
+
+  @HttpCode(200)
+  @UseGuards(JwtGuard)
+  @Get('me')
+  getCurrentUser(@Req() req: any) {
+    console.log("user",req.user)
+    return this.userService.findOne(req.user.id)
   }
 }

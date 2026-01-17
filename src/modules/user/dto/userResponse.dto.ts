@@ -5,7 +5,7 @@ export class UserResponseDto {
   id: string;
 
   @Expose()
-  username: string;
+  fullName: string;
 
   @Expose()
   email: string;

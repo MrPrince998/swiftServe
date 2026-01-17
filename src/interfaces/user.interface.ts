@@ -4,7 +4,7 @@ import { BillingSubscription } from './subscription.interface';
 export interface User {
   id: string;
   imageUrl?: string;
-  username: string;
+  fullName: string;
   email: string;
   isEmailVerified: boolean;
   otp?: string;

@@ -1,6 +1,7 @@
 import { restaurantStatus } from '@interfaces/restaurant.interface';
 import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-branch.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from '@modules/user/entities/user.entity';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('restaurant')
 export class RestaurantTenent {
@@ -10,6 +11,14 @@ export class RestaurantTenent {
   @Column()
   restaurantName: string;
 
+  @OneToOne(() => User, (user) => user.restaurant, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'ownerId' })
+  owner: User;
+  
   @Column({ nullable: true })
   websiteUrl: string;
 

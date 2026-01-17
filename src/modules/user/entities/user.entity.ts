@@ -8,11 +8,12 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-branch.entity';
+import { RestaurantTenent } from '@modules/tenent/entities/tenent.entity';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid') id: string;
-  @Column() username: string;
+  @Column() fullName: string;
   @Column({ unique: true }) email: string;
   @Column({ nullable: true, unique: true }) phoneNumber?: string;
   @Column() password: string;
@@ -27,6 +28,8 @@ export class User {
   @Column({ default: false }) isEmployed: boolean;
   @Column({ nullable: true }) employeeID?: string;
 
+  @OneToOne(() => RestaurantTenent, (tenent) => tenent.owner)
+  restaurant?: RestaurantTenent;
   @ManyToOne(() => RestaurantBranch, (branch) => branch.staff)
   restaurantBranch?: RestaurantBranch;
   @Column({ default: false }) isSubscribed: boolean;
@@ -39,6 +42,7 @@ export class User {
 
   @Column({ type: 'simple-array', nullable: true }) notificationIds?: string[];
   @Column({ default: false }) isEmailVerified: boolean;
+  @Column({default: false}) isAgreementAccepted: boolean;
   @Column({ nullable: true }) otp?: string;
   @Column({ nullable: true }) otpExpiry?: Date;
   @Column({ default: false }) twoFactorEnabled: boolean;
