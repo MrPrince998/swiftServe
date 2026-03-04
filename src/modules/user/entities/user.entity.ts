@@ -1,5 +1,5 @@
-import { userRole } from '@interfaces/user.interface';
-import { BillingSubscription } from '@modules/billing-subscription/entities/billing-subscription.entity';
+import { userRole } from 'src/shared/interfaces/user.interface';
+import { BillingSubscription } from 'src/modules/billing-subscription/entities/billing-subscription.entity';
 import {
   Column,
   Entity,
@@ -7,8 +7,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-branch.entity';
-import { RestaurantTenent } from '@modules/tenent/entities/tenent.entity';
+import { RestaurantBranch } from 'src/modules/restaurant-branch/entities/resturant-branch.entity';
+import { RestaurantTenent } from 'src/modules/tenent/entities/tenent.entity';
 
 @Entity('users')
 export class User {

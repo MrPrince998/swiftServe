@@ -1,4 +1,4 @@
-import { userRole } from '@interfaces/user.interface';
+import { userRole } from 'src/shared/interfaces/user.interface';
 import { Expose, Exclude } from 'class-transformer';
 export class UserResponseDto {
   @Expose()

@@ -1,7 +1,7 @@
-import { MenuItem } from '@modules/menu-item/entities/menuItem.enitity';
-import { Table } from '@modules/table/entities/table.entity';
-import { RestaurantTenent } from '@modules/tenent/entities/tenent.entity';
-import { User } from '@modules/user/entities/user.entity';
+import { MenuItem } from 'src/modules/menu-item/entities/menuItem.enitity';
+import { Table } from 'src/modules/table/entities/table.entity';
+import { RestaurantTenent } from 'src/modules/tenent/entities/tenent.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import {
   Column,
   Entity,

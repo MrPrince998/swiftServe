@@ -1,6 +1,6 @@
-import { restaurantStatus } from '@interfaces/restaurant.interface';
-import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-branch.entity';
-import { User } from '@modules/user/entities/user.entity';
+import { restaurantStatus } from 'src/shared/interfaces/restaurant.interface';
+import { RestaurantBranch } from 'src/modules/restaurant-branch/entities/resturant-branch.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import {
   Column,
   Entity,

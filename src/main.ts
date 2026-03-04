@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import cookieParser from 'cookie-parser';
+const cookieParser = require('cookie-parser');
 import { join } from 'path';
 import * as fs from 'fs';
 import { NestExpressApplication } from '@nestjs/platform-express';

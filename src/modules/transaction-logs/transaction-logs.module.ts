@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TransactionLogsService } from './transaction-logs.service';
 import { TransactionLogsController } from './transaction-logs.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-branch.entity';
+import { RestaurantBranch } from 'src/modules/restaurant-branch/entities/resturant-branch.entity';
 import { TransactionLogs } from './entities/transactionLogs.entity';
 
 @Module({

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -6,9 +10,9 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserResponseDto } from './dto/userResponse.dto';
 import { plainToInstance } from 'class-transformer';
-import { CreateAuthDto } from '@modules/auth/dto/create-auth.dto';
+import { CreateAuthDto } from 'src/modules/auth/dto/create-auth.dto';
 import * as bcrypt from 'bcrypt';
-import { userRole } from '@interfaces/user.interface';
+import { userRole } from 'src/shared/interfaces/user.interface';
 
 @Injectable()
 export class UserService {
@@ -141,21 +145,17 @@ export class UserService {
     });
   }
 
-  async softDelete(id: string): Promise<{message: string}> {
+  async softDelete(id: string): Promise<{ message: string }> {
     const user = await this.userRepo.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     const savedUser = await this.userRepo.preload({ id, isUserDeleted: true });
-    if(!savedUser) {
+    if (!savedUser) {
       throw new NotFoundException('User not found during preload');
     }
     await this.userRepo.save(savedUser);
-    return {message: `User ${id} deleted successfully`};
+    return { message: `User ${id} deleted successfully` };
   }
-
- 
-
-  
 }

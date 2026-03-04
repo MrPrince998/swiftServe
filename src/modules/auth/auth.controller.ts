@@ -13,13 +13,15 @@ import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { JwtGuard } from 'src/strategy/auth/jwt.guard';
-import { UserService } from '@modules/user/user.service';
+import { UserService } from 'src/modules/user/user.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
   ) {}
 
   @Post('register')
@@ -40,7 +42,10 @@ export class AuthController {
       path: '/',
       maxAge: 1 * 24 * 60 * 60 * 1000,
     }); // 1 day
-    return res.json({ message: 'Register successful' });
+    return res.json({
+      message: 'Register successful',
+      redirectTo: '/dashboard',
+    });
   }
 
   @HttpCode(200)
@@ -63,7 +68,10 @@ export class AuthController {
       maxAge: 1 * 24 * 60 * 60 * 1000,
     }); // 1 day
 
-    return res.json({ message: 'Login successful' });
+    return res.json({
+      message: 'Login successful',
+      redirectTo: '/dashboard',
+    });
   }
 
   @UseGuards(JwtGuard)
@@ -80,13 +88,48 @@ export class AuthController {
   async forgotPassword(@Body() dto: LoginAuthDto, @Res() res: Response) {
     const { email } = dto;
     await this.authService.forgotPassword(email);
-    return res.json({ message: 'Password reset token sent successfully' });
+    return res.json({ message: 'Password reset email sent successfully' });
   }
 
   @HttpCode(200)
-  @UseGuards(JwtGuard)
-  @Get('me')
-  getCurrentUser(@Req() req: any) {
-    return this.userService.findOne(req.user.userId);
+  @Post('reset-password')
+  async resetPassword(
+    @Body() body: { email: string; password: string; token: string },
+    @Res() res: Response,
+  ) {
+    const { email, password, token } = body;
+    const result = await this.authService.resetPassword(email, password, token);
+    return res.json(result);
+  }
+
+  @HttpCode(200)
+  @Get('check-auth')
+  async checkAuth(@Req() req: Request, @Res() res: Response) {
+    try {
+      const accessToken = req.cookies?.accessToken;
+      if (!accessToken) {
+        return res.json({ authenticated: false });
+      }
+
+      // Verify the token
+      const payload = this.jwtService.verify(accessToken);
+      const user = await this.userService.findOne(payload.sub);
+
+      if (user) {
+        return res.json({
+          authenticated: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            fullName: user.fullName,
+            role: user.role,
+          },
+        });
+      }
+
+      return res.json({ authenticated: false });
+    } catch (error) {
+      return res.json({ authenticated: false });
+    }
   }
 }

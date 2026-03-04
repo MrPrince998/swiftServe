@@ -8,9 +8,9 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@modules/user/entities/user.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { userRole } from '@interfaces/user.interface';
+import { userRole } from 'src/shared/interfaces/user.interface';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -19,9 +19,9 @@ import {
 } from './dto/refresh-token.dto';
 import { GenerateToken } from 'src/utils/generateToken';
 import crypto from 'crypto';
-import { UserResponseDto } from '@modules/user/dto/userResponse.dto';
-import { plainToInstance } from 'class-transformer';
-import { UserService } from '@modules/user/user.service';
+import { Queue } from 'bullmq';
+import { EMAIL_QUEUE } from 'src/shared/Queue/queue.constants';
+import { InjectQueue } from '@nestjs/bull';
 
 interface JwtPayload {
   sub: string;
@@ -36,14 +36,24 @@ export class AuthService {
     private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @InjectQueue(EMAIL_QUEUE)
+    private readonly emailQueue: Queue,
   ) {}
 
   async register(createAuthDto: CreateAuthDto) {
     const { email, password, fullName, phoneNumber } = createAuthDto;
     const existingUser = await this.userRepo.findOne({ where: { email } });
-    
+
     if (existingUser) {
       throw new BadRequestException('User already exists');
+    }
+
+    const isUniuquePhone = await this.userRepo.findOne({
+      where: { phoneNumber },
+    });
+
+    if (isUniuquePhone) {
+      throw new BadRequestException('Phone number already in use');
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = this.userRepo.create({
@@ -54,6 +64,21 @@ export class AuthService {
       phoneNumber,
     });
     await this.userRepo.save(user);
+
+    await this.emailQueue.add(
+      'sendWelcome',
+      {
+        email: user.email,
+        name: user.fullName,
+      },
+      {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+      },
+    );
 
     const payload = { id: user.id, email: user.email, role: user.role };
     const accessToken = await this.generateAccessToken(payload);
@@ -103,6 +128,11 @@ export class AuthService {
     await this.userRepo.save(user);
 
     // logic to send email
+    await this.emailQueue.add('resetPassword', {
+      email: user.email,
+      name: user.fullName,
+      resetLink: `${this.configService.get<string>('FRONTEND_URL')}/reset-password?token=${rawToken}&email=${user.email}`,
+    });
   }
 
   async resetPassword(email: string, password: string, token: string) {
@@ -111,12 +141,15 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    if (user.resetPasswordToken !== token) {
+    // compare with stored hash
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    if (user.resetPasswordToken !== hashedToken) {
       throw new UnauthorizedException();
     }
 
     if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Reset token has expired');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

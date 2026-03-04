@@ -1,7 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthController } from './modules/auth/auth.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { BillingSubscriptionModule } from './modules/billing-subscription/billing-subscription.module';
@@ -29,7 +28,7 @@ import { InternalAccessMiddleware } from './modules/auth/InternalAccessMiddlewar
     TableModule,
     TransactionLogsModule,
   ],
-  controllers: [AppController, AuthController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {

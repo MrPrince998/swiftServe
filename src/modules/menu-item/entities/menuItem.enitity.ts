@@ -1,5 +1,5 @@
-import { FoodTags } from '@modules/food-tags/entities/foodTags.entity';
-import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-branch.entity';
+import { FoodTags } from 'src/modules/food-tags/entities/foodTags.entity';
+import { RestaurantBranch } from 'src/modules/restaurant-branch/entities/resturant-branch.entity';
 import {
   Column,
   Entity,

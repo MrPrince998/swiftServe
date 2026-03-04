@@ -1,5 +1,5 @@
-import { BranchStatus } from '@interfaces/branch.interface';
-import { TransactionLogs } from '@modules/transaction-logs/entities/transactionLogs.entity';
+import { BranchStatus } from 'src/shared/interfaces/branch.interface';
+import { TransactionLogs } from 'src/modules/transaction-logs/entities/transactionLogs.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

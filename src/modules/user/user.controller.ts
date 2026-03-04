@@ -15,7 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtGuard } from 'src/strategy/auth/jwt.guard';
 import { RolesGuard } from 'src/strategy/role/role.guard';
 import { Roles } from 'src/strategy/role/role.decorators';
-import { userRole } from 'src/interfaces/user.interface';
+import { userRole } from 'src/shared/interfaces/user.interface';
 
 @Controller('user')
 export class UserController {

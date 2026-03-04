@@ -1,28 +1,27 @@
-import nodemailer from "nodemailer";
-import dotenv from 'dotenv';
+import * as nodemailer from "nodemailer";
 import { otpTemplate, passwordResetTemplate, welcomeTemplate } from "./templates/email.templates";
+import { ConfigService } from "@nestjs/config";
+import { Injectable } from "@nestjs/common";
 
-
-dotenv.config();
-
-class EmailService {
+@Injectable()
+export class EmailService {
     private transporter;
 
-    constructor() {
+    constructor(private readonly configService: ConfigService){
         this.transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
-            secure: false,
+            host: this.configService.get<string>('SMTP_HOST'),
+            port: this.configService.get<number>('SMTP_PORT'),
+            secure: false, // true for 465, false for other ports
             auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            }
-        })
+                user: this.configService.get<string>('SMTP_USER'),
+                pass: this.configService.get<string>('SMTP_PASS'),
+            },
+        });
     }
 
     private async sendEmail(to: string, subject: string, html: string) {
-        return this.transporter.sendEmail({
-            from: process.env.EMAIL_FROM,
+        return this.transporter.sendMail({
+            from: this.configService.get<string>('EMAIL_FROM'),
             to, 
             subject,
             html,
@@ -45,4 +44,3 @@ class EmailService {
     }
 }
 
-export const emailService = new EmailService()

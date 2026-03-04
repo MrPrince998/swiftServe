@@ -1,9 +1,9 @@
 import {
   TransactionMethod,
   TransactionStatus,
-} from '@interfaces/transactionLogs.interface';
-import { RestaurantBranch } from '@modules/restaurant-branch/entities/resturant-branch.entity';
-import { Table } from '@modules/table/entities/table.entity';
+} from 'src/shared/interfaces/transactionLogs.interface';
+import { RestaurantBranch } from 'src/modules/restaurant-branch/entities/resturant-branch.entity';
+import { Table } from 'src/modules/table/entities/table.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

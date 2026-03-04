@@ -1,4 +1,4 @@
-import { MenuItem } from '@modules/menu-item/entities/menuItem.enitity';
+import { MenuItem } from 'src/modules/menu-item/entities/menuItem.enitity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
