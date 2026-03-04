@@ -12,7 +12,7 @@ export class TenentService {
 
     async createRestaurant(tenent: RestaurantTenent, userId: string) {
         const existingRestaurant = await this.tenentRepo.findOne({
-            where: {owner: {id: userId}},
+            where: {OwnerId: userId},
         });
         if (existingRestaurant) {
             throw new BadRequestException('You already have a restaurant');
@@ -20,14 +20,14 @@ export class TenentService {
         
         const restaurant = this.tenentRepo.create({
             ...tenent,
-            owner: {id: userId},
+            OwnerId: userId,
         });
         return await this.tenentRepo.save(restaurant);
     }
 
     async getMyRestaurant(userId: string) {
         const restaurant = await this.tenentRepo.findOne({
-            where: {owner: {id: userId}},
+            where: {OwnerId: userId},
         });
         if (!restaurant) {
             throw new BadRequestException('Restaurant not found');
@@ -37,7 +37,7 @@ export class TenentService {
 
     async updateRestaurant(tenent: RestaurantTenent, userId: string) {
         const existingRestaurant = await this.tenentRepo.findOne({
-            where: {owner: {id: userId}},
+            where: {OwnerId: userId},
         });
         if (!existingRestaurant) {
             throw new BadRequestException('Restaurant not found');
@@ -49,7 +49,7 @@ export class TenentService {
 
     async deleteRestaurant(userId: string) {
         const existingRestaurant = await this.tenentRepo.findOne({
-            where: {owner: {id: userId}},
+            where: {OwnerId: userId},
         });
         if (!existingRestaurant) {
             throw new BadRequestException('Restaurant not found');

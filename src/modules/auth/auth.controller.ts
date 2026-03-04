@@ -11,7 +11,7 @@ import {
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { AuthDto } from './dto/auth-dto';
+import { LoginAuthDto } from './dto/login-auth.dto';
 import { JwtGuard } from 'src/strategy/auth/jwt.guard';
 import { UserService } from '@modules/user/user.service';
 
@@ -19,7 +19,8 @@ import { UserService } from '@modules/user/user.service';
 export class AuthController {
   constructor(
     private readonly userService: UserService,
-    private readonly authService: AuthService) {}
+    private readonly authService: AuthService,
+  ) {}
 
   @Post('register')
   async register(@Body() dto: CreateAuthDto, @Res() res: Response) {
@@ -44,7 +45,7 @@ export class AuthController {
 
   @HttpCode(200)
   @Post('login')
-  async login(@Body() dto: AuthDto, @Res() res: Response) {
+  async login(@Body() dto: LoginAuthDto, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.login(dto);
 
     res.cookie('accessToken', accessToken, {
@@ -76,7 +77,7 @@ export class AuthController {
 
   @HttpCode(200)
   @Post('forgot-password')
-  async forgotPassword(@Body() dto: AuthDto, @Res() res: Response) {
+  async forgotPassword(@Body() dto: LoginAuthDto, @Res() res: Response) {
     const { email } = dto;
     await this.authService.forgotPassword(email);
     return res.json({ message: 'Password reset token sent successfully' });
@@ -86,6 +87,6 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @Get('me')
   getCurrentUser(@Req() req: any) {
-    return this.userService.findOne(req.user.userId)
+    return this.userService.findOne(req.user.userId);
   }
 }

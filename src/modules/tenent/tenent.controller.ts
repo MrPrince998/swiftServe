@@ -20,4 +20,11 @@ export class TenentController {
   getMyRestaurant(@Req() req: any) {
     return this.tenentService.getMyRestaurant(req.user.userId);
   }
+
+  @UseGuards(JwtGuard) 
+  @HttpCode(200)
+  @Get('all-restaurant')
+  updateRestaurant(@Body() tenent: RestaurantTenent, @Req() req: any) { 
+    return this.tenentService.updateRestaurant(tenent, req.user.userId);
+  }
 }

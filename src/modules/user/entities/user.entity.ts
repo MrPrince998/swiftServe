@@ -28,7 +28,10 @@ export class User {
   @Column({ default: false }) isEmployed: boolean;
   @Column({ nullable: true }) employeeID?: string;
 
-  @OneToOne(() => RestaurantTenent, (tenent) => tenent.owner)
+  @ManyToOne((type) => RestaurantTenent, (restaurant) => restaurant.users, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
   restaurant?: RestaurantTenent;
   @ManyToOne(() => RestaurantBranch, (branch) => branch.staff)
   restaurantBranch?: RestaurantBranch;
@@ -42,12 +45,15 @@ export class User {
 
   @Column({ type: 'simple-array', nullable: true }) notificationIds?: string[];
   @Column({ default: false }) isEmailVerified: boolean;
-  @Column({default: false}) isAgreementAccepted: boolean;
+  @Column({ default: false }) isAgreementAccepted: boolean;
   @Column({ nullable: true }) otp?: string;
   @Column({ nullable: true }) otpExpiry?: Date;
   @Column({ default: false }) twoFactorEnabled: boolean;
-  @Column({ type: 'varchar', length: 64, nullable: true }) resetPasswordToken?: string | null;
-  @Column({ type: 'timestamp', nullable: true }) resetPasswordExpires?: Date | null;
+  @Column({ type: 'varchar', length: 64, nullable: true }) resetPasswordToken?:
+    | string
+    | null;
+  @Column({ type: 'timestamp', nullable: true })
+  resetPasswordExpires?: Date | null;
   @Column({ default: true }) isPushNotificationsEnabled: boolean;
   @Column({ default: true }) isEmailNotificationsEnabled: boolean;
   @Column({ default: false }) isUserDeleted: boolean;

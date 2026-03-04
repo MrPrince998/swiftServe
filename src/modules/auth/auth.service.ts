@@ -11,7 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@modules/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { userRole } from '@interfaces/user.interface';
-import { AuthDto } from './dto/auth-dto';
+import { LoginAuthDto } from './dto/login-auth.dto';
 import { ConfigService } from '@nestjs/config';
 import {
   RefreshTokenDto,
@@ -39,13 +39,13 @@ export class AuthService {
   ) {}
 
   async register(createAuthDto: CreateAuthDto) {
-    const { email, password,fullName, phoneNumber } = createAuthDto;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    const { email, password, fullName, phoneNumber } = createAuthDto;
     const existingUser = await this.userRepo.findOne({ where: { email } });
+    
     if (existingUser) {
       throw new BadRequestException('User already exists');
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = this.userRepo.create({
       email,
       password: hashedPassword,
@@ -65,8 +65,8 @@ export class AuthService {
     };
   }
 
-  async login(authDto: AuthDto) {
-    const { email, password } = authDto;
+  async login(loginAuthDto: LoginAuthDto) {
+    const { email, password } = loginAuthDto;
 
     const user = await this.userRepo.findOne({ where: { email } });
 
@@ -94,13 +94,15 @@ export class AuthService {
     }
 
     const rawToken = GenerateToken();
-    const hasedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const hasedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
     user.resetPasswordToken = hasedToken;
     user.resetPasswordExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
     await this.userRepo.save(user);
 
     // logic to send email
-
   }
 
   async resetPassword(email: string, password: string, token: string) {
@@ -108,15 +110,15 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException();
     }
-    
-    if(user.resetPasswordToken !== token) {
+
+    if (user.resetPasswordToken !== token) {
       throw new UnauthorizedException();
     }
 
     if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
       throw new UnauthorizedException();
     }
-    
+
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.resetPasswordToken = null;
@@ -126,14 +128,14 @@ export class AuthService {
   }
 
   async verifyEmail(email: string) {
-      const user = await this.userRepo.findOne({ where: { email } });
-      if (!user) {
-        throw new UnauthorizedException();
-      }
-      user.isEmailVerified = true;
-      await this.userRepo.save(user);
-      return { message: 'Email verified successfully' };
+    const user = await this.userRepo.findOne({ where: { email } });
+    if (!user) {
+      throw new UnauthorizedException();
     }
+    user.isEmailVerified = true;
+    await this.userRepo.save(user);
+    return { message: 'Email verified successfully' };
+  }
 
   async generateAccessToken(
     user: Pick<User, 'id' | 'email' | 'role'>,
