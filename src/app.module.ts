@@ -6,7 +6,7 @@ import { UserModule } from './modules/user/user.module';
 import { BillingSubscriptionModule } from './modules/billing-subscription/billing-subscription.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
-import { TenentModule } from './modules/tenent/tenent.module';
+import { RestaurantModule } from './modules/restaurant/restaurant.module';
 import { RestaurantBranchModule } from './modules/restaurant-branch/restaurant-branch.module';
 import { FoodTagsModule } from './modules/food-tags/food-tags.module';
 import { MenuItemModule } from './modules/menu-item/menu-item.module';
@@ -21,7 +21,7 @@ import { InternalAccessMiddleware } from './modules/auth/InternalAccessMiddlewar
     AuthModule,
     UserModule,
     BillingSubscriptionModule,
-    TenentModule,
+    RestaurantModule,
     RestaurantBranchModule,
     FoodTagsModule,
     MenuItemModule,

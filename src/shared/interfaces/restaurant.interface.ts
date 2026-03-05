@@ -9,6 +9,8 @@ export interface Restaurant {
   restaurantStatus: restaurantStatus;
   branchIds: string[];
   planIds?: string;
+  planStartDate?: Date;
+  planEndDate?: Date;
   subscriptionStatus?: string;
   subscriptionId?: string;
   maxUsers?: number;
@@ -20,6 +22,8 @@ export interface Restaurant {
 }
 
 export enum restaurantStatus {
+  TRIAL = 'trial',
   ACTIVE = 'active',
-  INACTIVE = 'inactive',
+  EXPIRED = 'expired',
+  SUSPENDED = 'suspended',
 }

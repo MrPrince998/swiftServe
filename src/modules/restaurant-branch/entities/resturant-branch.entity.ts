@@ -1,6 +1,6 @@
 import { MenuItem } from 'src/modules/menu-item/entities/menuItem.enitity';
 import { Table } from 'src/modules/table/entities/table.entity';
-import { RestaurantTenent } from 'src/modules/tenent/entities/tenent.entity';
+import { Restaurant } from '@modules/restaurant/entities/restaurant.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 import {
   Column,
@@ -16,8 +16,8 @@ export class RestaurantBranch {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => RestaurantTenent, (restaurant) => restaurant.branches)
-  restaurant: RestaurantTenent;
+  @ManyToOne(() => Restaurant, (restaurant) => restaurant.branches)
+  restaurant: Restaurant;
 
   @Column()
   branchCode: string;
