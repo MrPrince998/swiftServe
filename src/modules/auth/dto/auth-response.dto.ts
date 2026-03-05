@@ -33,7 +33,7 @@ export class CheckAuthResponseDto {
   authenticated: boolean;
 
   @ApiProperty({ type: CheckAuthUserDto, required: false })
-  user?: CheckAuthUserDto;
+  data?: CheckAuthUserDto;
 }
 
 export class LogoutResponseDto {
@@ -42,6 +42,12 @@ export class LogoutResponseDto {
     description: 'Logout success message',
   })
   message: string;
+
+  @ApiProperty({
+    example: '/',
+    description: 'URL to redirect after successful logout',
+  })
+  redirectedTo: string;
 }
 
 export class EmailVerificationResponseDto {

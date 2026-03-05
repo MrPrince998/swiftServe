@@ -8,7 +8,7 @@ import { RestaurantBranch } from 'src/modules/restaurant-branch/entities/restura
 import { JwtGuard } from 'src/strategy/auth/jwt.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/strategy/role/role.guard';
-import { TenentModule } from 'src/modules/tenent/tenent.module';
+import { RestaurantModule } from '@modules/restaurant/restaurant.module';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { TenentModule } from 'src/modules/tenent/tenent.module';
       User,
       BillingSubscription,
       RestaurantBranch,
-      TenentModule,
+      RestaurantModule,
     ]),
   ],
   controllers: [UserController],

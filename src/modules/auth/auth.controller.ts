@@ -111,6 +111,7 @@ export class AuthController {
 
     return {
       message: 'Logout successful',
+      redirectedTo: '/'
     };
   }
 
@@ -187,7 +188,7 @@ export class AuthController {
 
     return {
       authenticated: true,
-      user: {
+      data: {
         id: userDetails.id,
         email: userDetails.email,
         fullName: userDetails.fullName,

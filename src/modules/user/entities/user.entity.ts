@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { RestaurantBranch } from 'src/modules/restaurant-branch/entities/resturant-branch.entity';
-import { RestaurantTenent } from 'src/modules/tenent/entities/tenent.entity';
+import { Restaurant } from '@modules/restaurant/entities/restaurant.entity';
 
 @Entity('users')
 export class User {
@@ -28,11 +28,11 @@ export class User {
   @Column({ default: false }) isEmployed: boolean;
   @Column({ nullable: true }) employeeID?: string;
 
-  @ManyToOne((type) => RestaurantTenent, (restaurant) => restaurant.users, {
+  @ManyToOne((type) => Restaurant, (restaurant) => restaurant.users, {
     eager: false,
     onDelete: 'CASCADE',
   })
-  restaurant?: RestaurantTenent;
+  restaurant?: Restaurant;
   @ManyToOne(() => RestaurantBranch, (branch) => branch.staff)
   restaurantBranch?: RestaurantBranch;
   @Column({ default: false }) isSubscribed: boolean;
