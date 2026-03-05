@@ -12,6 +12,7 @@ import { UserModule } from 'src/modules/user/user.module';
 import { TenentModule } from 'src/modules/tenent/tenent.module';
 import { QueueModule } from 'src/shared/Queue/queue.module';
 import { EmailModule } from 'src/shared/email/email.module';
+import { CookieService } from './services/cookie.service';
 
 @Module({
   imports: [
@@ -26,9 +27,9 @@ import { EmailModule } from 'src/shared/email/email.module';
     EmailModule,
     TenentModule,
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, CookieService],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, CookieService],
 })
 export class AuthModule {
   configure(consumer: MiddlewareConsumer) {

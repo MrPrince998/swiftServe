@@ -158,4 +158,14 @@ export class UserService {
     await this.userRepo.save(savedUser);
     return { message: `User ${id} deleted successfully` };
   }
+
+  async getProfile(id: string): Promise<UserResponseDto> {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+  }
 }

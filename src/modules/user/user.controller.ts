@@ -37,7 +37,10 @@ export class UserController {
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(userRole.ADMIN, userRole.SUPER_ADMIN)
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     return this.userService.update(id, updateUserDto);
   }
 
@@ -48,5 +51,12 @@ export class UserController {
     return this.userService.softDelete(id);
   }
 
-  
+  @Get('profile')
+  @UseGuards(JwtGuard)
+  getProfile(@Req() req: Request) {
+    const userId = req['user']?.id;
+
+    console.log(userId);
+    return this.userService.getProfile(userId);
+  }
 }

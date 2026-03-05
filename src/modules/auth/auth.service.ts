@@ -18,7 +18,7 @@ import {
   RefreshTokenResponseDto,
 } from './dto/refresh-token.dto';
 import { GenerateToken } from 'src/utils/generateToken';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { Queue } from 'bullmq';
 import { EMAIL_QUEUE } from 'src/shared/Queue/queue.constants';
 import { InjectQueue } from '@nestjs/bull';
@@ -112,22 +112,23 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(email: string) {
+  async forgotPassword(email: string): Promise<void> {
     const user = await this.userRepo.findOne({ where: { email } });
     if (!user) {
-      throw new UnauthorizedException();
+      // Don't throw error for security - prevent user enumeration
+      return;
     }
 
     const rawToken = GenerateToken();
-    const hasedToken = crypto
+    const hashedToken = crypto
       .createHash('sha256')
       .update(rawToken)
       .digest('hex');
-    user.resetPasswordToken = hasedToken;
-    user.resetPasswordExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await this.userRepo.save(user);
 
-    // logic to send email
+    // Queue email sending
     await this.emailQueue.add('resetPassword', {
       email: user.email,
       name: user.fullName,
@@ -157,17 +158,59 @@ export class AuthService {
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
     await this.userRepo.save(user);
-    return { message: 'Password reset successfully' };
+
+    await this.emailQueue.add('passwordResetSuccessfull', {
+      email: user.email,
+      name: user.fullName,
+    });
   }
 
-  async verifyEmail(email: string) {
+  async sendEmailVerificationOTP(email: string) {
+    const user = await this.userRepo.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Email is already verified');
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await this.userRepo.save(user);
+
+    await this.emailQueue.add('sendOTP', {
+      email: user.email,
+      name: user.fullName,
+      otp,
+    });
+  }
+
+  async verifyEmail(email: string, otp: string) {
     const user = await this.userRepo.findOne({ where: { email } });
     if (!user) {
       throw new UnauthorizedException();
     }
+
+    if (user.otp !== otp) {
+      throw new UnauthorizedException('Invalid OTP');
+    }
+
+    if (!user.otpExpiry || user.otpExpiry < new Date()) {
+      throw new UnauthorizedException('OTP has expired');
+    }
+
     user.isEmailVerified = true;
+    user.otp = null;
+    user.otpExpiry = null;
     await this.userRepo.save(user);
-    return { message: 'Email verified successfully' };
+
+    await this.emailQueue.add('emailVerified', {
+      email: user.email,
+      name: user.fullName,
+    });
   }
 
   async generateAccessToken(
@@ -266,5 +309,13 @@ export class AuthService {
         role: user.role,
       },
     };
+  }
+
+  async getUserById(userId: string): Promise<User | null> {
+    try {
+      return await this.userRepo.findOne({ where: { id: userId } });
+    } catch (error) {
+      return null;
+    }
   }
 }

@@ -46,8 +46,8 @@ export class User {
   @Column({ type: 'simple-array', nullable: true }) notificationIds?: string[];
   @Column({ default: false }) isEmailVerified: boolean;
   @Column({ default: false }) isAgreementAccepted: boolean;
-  @Column({ nullable: true }) otp?: string;
-  @Column({ nullable: true }) otpExpiry?: Date;
+  @Column({ type: 'varchar', length: 6, nullable: true }) otp?: string | null;
+  @Column({ type: 'timestamp', nullable: true }) otpExpiry?: Date | null;
   @Column({ default: false }) twoFactorEnabled: boolean;
   @Column({ type: 'varchar', length: 64, nullable: true }) resetPasswordToken?:
     | string

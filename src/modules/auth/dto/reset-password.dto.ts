@@ -8,30 +8,10 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
-export class CreateAuthDto {
-  @ApiProperty({
-    example: 'John Doe',
-    description: 'Full name of the user',
-  })
-  @IsString({ message: 'Full name must be a string' })
-  @IsNotEmpty({ message: 'Full name is required' })
-  @Transform(({ value }) => value?.trim())
-  fullName: string;
-
-  @ApiProperty({
-    example: '+911234567890',
-    description: 'Phone number of the user',
-  })
-  @IsString({ message: 'Phone number must be a string' })
-  @IsNotEmpty({ message: 'Phone number is required' })
-  @Matches(/^\+?[1-9]\d{1,14}$/, {
-    message: 'Please provide a valid phone number',
-  })
-  phoneNumber: string;
-
+export class ResetPasswordDto {
   @ApiProperty({
     example: 'user@example.com',
-    description: 'Email address of the user',
+    description: 'User email address',
   })
   @IsEmail({}, { message: 'Please provide a valid email address' })
   @IsNotEmpty({ message: 'Email is required' })
@@ -39,9 +19,9 @@ export class CreateAuthDto {
   email: string;
 
   @ApiProperty({
-    example: 'StrongPassword123!',
+    example: 'NewStrongPassword123!',
     description:
-      'User password (min 8 chars, must contain uppercase, lowercase, number)',
+      'New password (min 8 chars, must contain uppercase, lowercase, number, special char)',
   })
   @IsString({ message: 'Password must be a string' })
   @IsNotEmpty({ message: 'Password is required' })
