@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
   Param,
   Post,
   Req,
@@ -15,11 +14,14 @@ import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import {
   RestaurantDeleteResponseDto,
   RestaurantResponseDto,
+  RestaurantApiResponseDto,
+  RestaurantDeleteApiResponseDto,
 } from './dto/restaurant-response.dto';
 import { Request } from 'express';
 import { RolesGuard } from 'src/strategy/role/role.guard';
 import { Roles } from 'src/strategy/role/role.decorators';
 import { userRole } from 'src/shared/interfaces/user.interface';
+import { APIResponse } from 'src/shared/interfaces/apiResponse';
 
 interface JwtUser {
   sub: string;
@@ -43,7 +45,7 @@ export class RestaurantController {
   @ApiResponse({
     status: 201,
     description: 'Restaurant created successfully',
-    type: RestaurantResponseDto,
+    type: RestaurantApiResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -56,9 +58,16 @@ export class RestaurantController {
   async createRestaurant(
     @Body() createRestaurantDto: CreateRestaurantDto,
     @Req() req: AuthenticatedRequest,
-  ): Promise<RestaurantResponseDto> {
+  ): Promise<APIResponse<RestaurantResponseDto>> {
     const userId = req.user.sub;
-    return this.restaurantService.createRestaurant(createRestaurantDto, userId);
+    const restaurant = await this.restaurantService.createRestaurant(
+      createRestaurantDto,
+      userId,
+    );
+    return {
+      message: 'Restaurant created successfully',
+      data: restaurant,
+    };
   }
 
   @Delete(':id')
@@ -69,7 +78,7 @@ export class RestaurantController {
   @ApiResponse({
     status: 200,
     description: 'Restaurant deleted successfully',
-    type: RestaurantDeleteResponseDto,
+    type: RestaurantDeleteApiResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -86,8 +95,11 @@ export class RestaurantController {
   async deleteRestaurant(
     @Req() req: AuthenticatedRequest,
     @Param('id') restaurantId: string,
-  ): Promise<RestaurantDeleteResponseDto> {
+  ): Promise<APIResponse<RestaurantDeleteResponseDto>> {
     await this.restaurantService.deleteRestaurant(restaurantId);
-    return { message: 'Restaurant deleted successfully' };
+    return {
+      message: 'Restaurant deleted successfully',
+      data: { message: 'Restaurant deleted successfully' },
+    };
   }
 }

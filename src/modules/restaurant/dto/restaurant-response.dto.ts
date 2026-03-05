@@ -69,3 +69,31 @@ export class RestaurantDeleteResponseDto {
   })
   message: string;
 }
+
+export class RestaurantApiResponseDto {
+  @ApiProperty({
+    example: 'Restaurant created successfully',
+    description: 'Response message',
+  })
+  message: string;
+
+  @ApiProperty({
+    type: RestaurantResponseDto,
+    description: 'Restaurant data',
+  })
+  data: RestaurantResponseDto;
+}
+
+export class RestaurantDeleteApiResponseDto {
+  @ApiProperty({
+    example: 'Restaurant deleted successfully',
+    description: 'Response message',
+  })
+  message: string;
+
+  @ApiProperty({
+    type: RestaurantDeleteResponseDto,
+    description: 'Delete confirmation data',
+  })
+  data: RestaurantDeleteResponseDto;
+}
