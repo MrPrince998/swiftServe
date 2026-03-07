@@ -24,6 +24,7 @@ import { LoginAuthDto } from './dto/login-auth.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import {
   AuthResponseDto,
   CheckAuthResponseDto,
@@ -111,7 +112,7 @@ export class AuthController {
 
     return {
       message: 'Logout successful',
-      redirectedTo: '/'
+      redirectedTo: '/',
     };
   }
 
@@ -258,6 +259,45 @@ export class AuthController {
 
     return {
       message: 'Email verified successfully',
+    };
+  }
+
+  @Post('refresh')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Refresh access token',
+    description:
+      'Uses a valid refresh token to generate new access and refresh tokens. Tokens are set in HTTP-only cookies.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid or expired refresh token',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Missing or malformed refresh token',
+  })
+  async refreshToken(
+    @Body() dto: RefreshTokenDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ message: string }> {
+    const result = await this.authService.refreshAccessToken(dto);
+
+    // Set new tokens in cookies
+    if (result.refreshToken) {
+      this.cookieService.setAuthTokens(
+        res,
+        result.accessToken,
+        result.refreshToken,
+      );
+    }
+
+    return {
+      message: 'Tokens refreshed successfully',
     };
   }
 }

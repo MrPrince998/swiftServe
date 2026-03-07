@@ -13,10 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { userRole } from 'src/shared/interfaces/user.interface';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { ConfigService } from '@nestjs/config';
-import {
-  RefreshTokenDto,
-  RefreshTokenResponseDto,
-} from './dto/refresh-token.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { GenerateToken } from 'src/utils/generateToken';
 import * as crypto from 'crypto';
 import { Queue } from 'bullmq';
@@ -265,15 +262,16 @@ export class AuthService {
     });
   }
 
-  async refreshAccessToken(
-    dto: RefreshTokenDto,
-  ): Promise<RefreshTokenResponseDto> {
+  async refreshAccessToken(dto: RefreshTokenDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const { refreshToken } = dto;
-    const refreshSecret = this.configService.get<string>('JWT_SECRET');
+    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
 
     if (!refreshSecret) {
       throw new BadRequestException(
-        'JWT_SECRET is not defined in configuration',
+        'JWT_REFRESH_SECRET is not defined in configuration',
       );
     }
 
@@ -297,17 +295,6 @@ export class AuthService {
     return {
       accessToken,
       refreshToken: newRefreshToken,
-      tokenType: 'Bearer',
-      expiresIn: parseInt(
-        this.configService.get<string>('JWT_EXPIRES_IN', '1h'),
-        10,
-      ),
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-      },
     };
   }
 
