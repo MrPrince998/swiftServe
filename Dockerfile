@@ -1,9 +1,9 @@
-FROM node:20-alpine
+# FROM node:20-alpine
 
-WORKDIR /app
+# WORKDIR /app
 
-COPY . .
+# COPY . .
 
-RUN pnpm install
+# RUN pnpm install
 
-CMD [ "pnpm", "start" ]
+# CMD [ "pnpm", "start" ]
