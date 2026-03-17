@@ -13,13 +13,27 @@ import { RestaurantModule } from '@modules/restaurant/restaurant.module';
 import { QueueModule } from 'src/shared/Queue/queue.module';
 import { EmailModule } from 'src/shared/email/email.module';
 import { CookieService } from './services/cookie.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Restaurant]),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
+    ConfigModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+
+        if (!secret) {
+          throw new Error('JWT_SECRET is not defined in configuration');
+        }
+
+        return {
+          secret,
+          signOptions: { expiresIn: '1h' },
+        };
+      },
     }),
     PassportModule,
     UserModule,

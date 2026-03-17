@@ -37,6 +37,37 @@ export class AuthService {
     private readonly emailQueue: Queue,
   ) {}
 
+  private getJwtExpiresInSeconds(
+    key: 'JWT_EXPIRES_IN' | 'JWT_REFRESH_EXPIRES_IN',
+    fallbackInSeconds: number,
+  ): number {
+    const value = this.configService.get<string>(key);
+
+    if (!value) {
+      return fallbackInSeconds;
+    }
+
+    if (/^\d+$/.test(value)) {
+      return Number(value);
+    }
+
+    const match = value.match(/^(\d+)([smhd])$/i);
+    if (!match) {
+      return fallbackInSeconds;
+    }
+
+    const amount = Number(match[1]);
+    const unit = match[2].toLowerCase();
+    const unitToSeconds: Record<string, number> = {
+      s: 1,
+      m: 60,
+      h: 3600,
+      d: 86400,
+    };
+
+    return amount * (unitToSeconds[unit] ?? fallbackInSeconds);
+  }
+
   async register(createAuthDto: CreateAuthDto) {
     const { email, password, fullName, phoneNumber } = createAuthDto;
     const existingUser = await this.userRepo.findOne({ where: { email } });
@@ -221,8 +252,7 @@ export class AuthService {
     };
 
     const secret = this.configService.get<string>('JWT_SECRET');
-    const rawExpireIn = this.configService.get<string>('JWT_EXPIRES_IN', '1h');
-    const expiresInSeconds = parseInt(rawExpireIn, 10);
+    const expiresIn = this.getJwtExpiresInSeconds('JWT_EXPIRES_IN', 3600);
 
     if (!secret) {
       throw new BadRequestException(
@@ -232,7 +262,7 @@ export class AuthService {
 
     return this.jwtService.signAsync(payload, {
       secret,
-      expiresIn: expiresInSeconds,
+      expiresIn,
     });
   }
 
@@ -246,19 +276,20 @@ export class AuthService {
       type: 'refresh',
     };
     const secret = this.configService.get<string>('JWT_REFRESH_SECRET');
-    const rawExpireIn = this.configService.get<string>(
+    const expiresIn = this.getJwtExpiresInSeconds(
       'JWT_REFRESH_EXPIRES_IN',
-      '1d',
+      86400,
     );
-    const expiresInSeconds = parseInt(rawExpireIn, 10);
+
     if (!secret) {
       throw new BadRequestException(
-        'JWT_SECRET is not defined in configuration',
+        'JWT_REFRESH_SECRET is not defined in configuration',
       );
     }
+
     return this.jwtService.signAsync(payload, {
       secret,
-      expiresIn: expiresInSeconds,
+      expiresIn,
     });
   }
 

@@ -19,9 +19,9 @@ export class CookieService {
 
   private getSecureCookieOptions(maxAge: number): CookieOptions {
     return {
-      httpOnly: true,
+      httpOnly: this.configService.get('NODE_ENV') === 'production',
       secure: this.configService.get('NODE_ENV') === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       path: '/',
       maxAge,
     };

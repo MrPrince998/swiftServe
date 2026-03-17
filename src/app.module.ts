@@ -16,7 +16,10 @@ import { InternalAccessMiddleware } from './modules/auth/InternalAccessMiddlewar
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env.local', '.env'],
+    }),
     DatabaseModule,
     AuthModule,
     UserModule,

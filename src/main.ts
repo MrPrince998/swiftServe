@@ -74,7 +74,7 @@ async function bootstrap() {
 
   app.useStaticAssets(publicPath);
 
-  const PORT = configService.get<number>('PORT') || 3000;
+  const PORT = configService.get<number>('PORT') || 4000;
 
   await app.listen(PORT);
   console.log(`Server is running on http://localhost:${PORT}`);
