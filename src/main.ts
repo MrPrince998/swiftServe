@@ -29,11 +29,10 @@ async function bootstrap() {
   const NODE_ENV = configService.get('NODE_ENV');
 
   app.use(cookieParser());
-
-  const ALLOWED_ORIGIN = ['http://localhost:3000', 'https://swiftserve.com'];
-
+  
   app.enableCors({
     origin: (origin, callback) => {
+      const ALLOWED_ORIGIN = ['http://localhost:3000', 'https://swiftserve.com'];
       if (!origin || ALLOWED_ORIGIN.includes(origin)) {
         callback(null, true);
       } else {

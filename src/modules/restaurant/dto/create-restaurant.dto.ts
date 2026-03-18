@@ -25,7 +25,6 @@ export class CreateRestaurantDto {
     required: false,
   })
   @IsOptional()
-  @IsString({ message: 'Website URL must be a string' })
   @IsUrl({}, { message: 'Website URL must be a valid URL' })
   @Transform(({ value }) => value?.trim())
   websiteUrl?: string;
