@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Req,
@@ -70,9 +71,63 @@ export class RestaurantController {
     };
   }
 
+  @Get()
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(userRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all restaurants' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of restaurants retrieved successfully',
+    type: [RestaurantApiResponseDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  async getAllRestaurants(): Promise<APIResponse<RestaurantResponseDto[]>> {
+    const restaurants = await this.restaurantService.getAllRestaurants();
+    return {
+      message: 'List of restaurants retrieved successfully',
+      data: restaurants,
+    };
+  }
+
+  @Get(':id')
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get a restaurant by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Restaurant retrieved successfully',
+    type: RestaurantApiResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid restaurant ID or restaurant not found',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Insufficient permissions (ADMIN role)',
+  })
+  async getRestaurantById(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<APIResponse<RestaurantResponseDto>> {
+    const userId = req.user.sub;
+    const restaurant = await this.restaurantService.getRestaurant(userId);
+    return {
+      message: 'Restaurant retrieved successfully',
+      data: restaurant,
+    };
+  }
+
   @Delete(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(userRole.ADMIN, userRole.USER)
+  @Roles(userRole.SUPER_ADMIN, userRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a restaurant' })
   @ApiResponse({

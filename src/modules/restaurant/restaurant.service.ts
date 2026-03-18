@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Restaurant } from './entities/restaurant.entity';
 import { Repository } from 'typeorm';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
+import { User } from '@modules/user/entities/user.entity';
 
 @Injectable()
 export class RestaurantService {
@@ -11,6 +12,8 @@ export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepo: Repository<Restaurant>,
+    @InjectRepository(User)
+    private readonly User: Repository<User>,
   ) {}
 
   async createRestaurant(
@@ -85,6 +88,70 @@ export class RestaurantService {
       throw new BadRequestException('Failed to create restaurant');
     }
   }
+
+  async getAllRestaurants(): Promise<Restaurant[]> {
+    try {
+      const restaurants = await this.restaurantRepo.find();
+      this.logger.log(`Retrieved ${restaurants.length} restaurants`);
+      return restaurants;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        `Failed to retrieve restaurants: ${err.message}`,
+        err.stack,
+      );
+      throw new BadRequestException('Failed to retrieve restaurants');
+    }
+  }
+
+  async getRestaurant(userId: string): Promise<Restaurant> {
+    try {
+      const userData = await this.User.findOne({
+        where: { id: userId },
+      });
+
+      if (!userData) {
+        this.logger.warn(
+          `Restaurant retrieval failed: user with id ${userId} not found`,
+        );
+        throw new BadRequestException('User not found');
+      }
+
+      if (userData.restaurant?.id) {
+        this.logger.warn(
+          `Restaurant retrieval failed: user ${userId} does not have access to restaurant ${userData.restaurant.id}`,
+        );
+        throw new BadRequestException(
+          'User does not have access to this restaurant',
+        );
+      }
+
+      const restaurant = await this.restaurantRepo.findOne({
+        where: { id: userData.restaurant?.id },
+      });
+      if (!restaurant) {
+        this.logger.warn(
+          `Restaurant retrieval failed: restaurant with id ${userData.restaurant?.id} not found`,
+        );
+        throw new BadRequestException('Restaurant not found');
+      }
+      this.logger.log(
+        `Restaurant retrieved successfully: ${userData.restaurant?.id}`,
+      );
+      return restaurant;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        `Failed to retrieve restaurant: ${err.message}`,
+        err.stack,
+      );
+      throw new BadRequestException('Failed to retrieve restaurant');
+    }
+  }
+
+  // async getCurrentWorkingRestaurant(): Promise<Restaurant> {
+  //   try {
+  //     const restaurant = await this.restaurantRepo.findOne({
 
   async deleteRestaurant(restaurantId: string): Promise<void> {
     try {

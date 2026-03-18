@@ -7,6 +7,7 @@ import { FoodTags } from 'src/modules/food-tags/entities/foodTags.entity';
 import { MenuItem } from 'src/modules/menu-item/entities/menuItem.enitity';
 import { Table } from 'src/modules/table/entities/table.entity';
 import { Restaurant } from './entities/restaurant.entity';
+import { User } from '@modules/user/entities/user.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { Restaurant } from './entities/restaurant.entity';
       MenuItem,
       Table,
       Restaurant,
+      User,
     ]),
   ],
   controllers: [RestaurantController],
