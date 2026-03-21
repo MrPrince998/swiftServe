@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/modules/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { userRole } from 'src/shared/interfaces/user.interface';
+import { Restaurant } from '@modules/restaurant/entities/restaurant.entity';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -31,6 +32,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(Restaurant)
+    private readonly restaurantRepo: Repository<Restaurant>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @InjectQueue(EMAIL_QUEUE)
@@ -329,9 +332,40 @@ export class AuthService {
     };
   }
 
-  async getUserById(userId: string): Promise<User | null> {
+  async getUserById(userId: string): Promise<{
+    id: string;
+    email: string;
+    fullName: string;
+    role: userRole;
+    isEmployed: boolean;
+    restaurantId?: string;
+    ownsRestaurant: boolean;
+    isAgreementAccepeted: boolean;
+  } | null> {
     try {
-      return await this.userRepo.findOne({ where: { id: userId } });
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        relations: { restaurant: true },
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      const ownedRestaurant = await this.restaurantRepo.findOne({
+        where: { ownerId: userId },
+      });
+
+      return {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+        isEmployed: user.isEmployed,
+        restaurantId: user.restaurant?.id ?? ownedRestaurant?.id,
+        ownsRestaurant: Boolean(ownedRestaurant),
+        isAgreementAccepeted: user.isAgreementAccepted,
+      };
     } catch (error) {
       return null;
     }

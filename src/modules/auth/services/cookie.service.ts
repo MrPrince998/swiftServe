@@ -18,10 +18,14 @@ export class CookieService {
   constructor(private readonly configService: ConfigService) {}
 
   private getSecureCookieOptions(maxAge: number): CookieOptions {
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
+
     return {
-      httpOnly: this.configService.get('NODE_ENV') === 'production',
-      secure: this.configService.get('NODE_ENV') === 'production',
-      sameSite: 'none',
+      // Browsers reject SameSite=None cookies unless Secure=true.
+      // In local HTTP development, use Lax + non-secure so auth cookies are stored.
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge,
     };

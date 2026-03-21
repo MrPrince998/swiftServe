@@ -194,6 +194,10 @@ export class AuthController {
         email: userDetails.email,
         fullName: userDetails.fullName,
         role: userDetails.role,
+        isEmployed: userDetails.isEmployed,
+        restaurantId: userDetails.restaurantId,
+        ownsRestaurant: userDetails.ownsRestaurant,
+        isAgreementAccepeted: userDetails.isAgreementAccepeted,
       },
     };
   }

@@ -26,6 +26,21 @@ export class CheckAuthUserDto {
 
   @ApiProperty({ example: 'USER' })
   role: string;
+
+  @ApiProperty({ example: false })
+  isEmployed: boolean;
+
+  @ApiProperty({
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
+  })
+  restaurantId?: string;
+
+  @ApiProperty({ example: false })
+  ownsRestaurant: boolean;
+
+  @ApiProperty({ example: false })
+  isAgreementAccepeted: boolean;
 }
 
 export class CheckAuthResponseDto {
